@@ -1,0 +1,16 @@
+VW_ActiveUserAccountPatient
+
+SELECT        dbo.UserAccountPatient.UserAccountId, dbo.UserAccountPatient.PatientId, dbo.UserAccount.UserName, dbo.UserAccount.Email, dbo.Patient.FirstName, dbo.Patient.MiddleName, dbo.Patient.LastName, dbo.Patient.CellPhone, 
+                         dbo.Patient.FirstName + ' ' + ISNULL(dbo.Patient.MiddleName, ' ') + ' ' + dbo.Patient.LastName AS Name, dbo.UserAccount.AccountType
+FROM            dbo.Patient INNER JOIN
+                         dbo.UserAccountPatient ON dbo.Patient.Id = dbo.UserAccountPatient.PatientId INNER JOIN
+                         dbo.UserAccount ON dbo.UserAccountPatient.UserAccountId = dbo.UserAccount.Id
+
+VW_ActiveUserAccountDoctor
+
+SELECT        dbo.UserAccountDoctor.UserAccountId, dbo.UserAccountDoctor.DoctorId, dbo.UserAccount.UserName, dbo.UserAccount.Email, dbo.Doctor.FirstName, dbo.Doctor.MiddleName, dbo.Doctor.LastName, 
+                         dbo.Doctor.FirstName + ' ' + ISNULL(dbo.Doctor.MiddleName, ' ') + ' ' + dbo.Doctor.LastName AS Name, dbo.UserAccount.AccountType
+FROM            dbo.Doctor INNER JOIN
+                         dbo.UserAccountDoctor ON dbo.Doctor.Id = dbo.UserAccountDoctor.DoctorId INNER JOIN
+                         dbo.UserAccount ON dbo.UserAccountDoctor.UserAccountId = dbo.UserAccount.Id
+

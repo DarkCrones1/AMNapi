@@ -14,10 +14,6 @@ public partial class ActiveUserAccountDoctor : BaseQueryable
 
     public string LastName { get; set; } = null!;
 
-    public string? Phone { get; set; }
-
-    public string CellPhone { get; set; } = null!;
-
     public string Email { get; set; } = null!;
 
     public short AccountType { get; set; }
