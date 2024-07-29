@@ -23,6 +23,8 @@ public partial class AMNDbContext : DbContext
 
     public virtual DbSet<Doctor> Doctor { get; set; }
 
+    public virtual DbSet<MapLocation> MapLocation { get; set; }
+
     public virtual DbSet<Patient> Patient { get; set; }
 
     public virtual DbSet<PatientAddress> PatientAddress { get; set; }

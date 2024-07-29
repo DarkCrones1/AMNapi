@@ -1,3 +1,4 @@
+using AMNApi.Dtos.QueryFilters;
 using AMNApi.Dtos.Request.Create;
 using AMNApi.Dtos.Response;
 using AMNApi.Entities;
@@ -13,6 +14,15 @@ public class MappingProfile : Profile
     {
 
         // ResponseMapping
+
+        CreateMap<Appointment, AppointmentResponseDto>()
+        .ForMember(
+            dest => dest.IsDeleted,
+            opt => opt.MapFrom(src => src.IsDeleted)
+        ).ForMember(
+            dest => dest.StatusName,
+            opt => opt.MapFrom(src => EnumHelper.GetDescription<AppoinmentStatus>((AppoinmentStatus)src.Status))
+        );
 
         CreateMap<Consultory, ConsultoryResponseDto>()
         .ForMember(
@@ -73,7 +83,7 @@ public class MappingProfile : Profile
             dest => dest.IsDeleted,
             opt => opt.MapFrom(src => src.IsDeleted)
         ).AfterMap(
-            (src, dest) => 
+            (src, dest) =>
             {
                 var doctor = src.Doctor.FirstOrDefault() ?? new Doctor();
                 dest.DoctorId = doctor.Id;
@@ -88,6 +98,12 @@ public class MappingProfile : Profile
         );
 
         // CreateRequestMapping
+
+        CreateMap<AppointmentCreateRequestDto, Appointment>()
+        .ForMember(
+            dest => dest.Status,
+            opt => opt.MapFrom(src => AppoinmentStatus.Scheduled)
+        );
 
         CreateMap<ConsultoryCreateRequestDto, Consultory>()
         .AfterMap(
@@ -204,5 +220,11 @@ public class MappingProfile : Profile
         // UpdateMapping
 
         // QueryFilterMapping
+
+        CreateMap<ConsultoryQueryFilter, Consultory>();
+
+        CreateMap<MapLocationQueryFilter, MapLocation>();
+
+        CreateMap<UserAccountQueryFilter, UserAccount>();
     }
 }

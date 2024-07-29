@@ -10,12 +10,12 @@ using AMNApi.Data;
 using AMNApi.Dtos.Response;
 using AMNApi.Dtos.Request.Create;
 using AMNApi.Entities;
-// using AMNApi.Dtos.QueryFilters;
 using AMNApi.Filters.Exceptions;
 using AMNApi.Entities.Base;
 using Microsoft.AspNetCore.Authorization;
 using AMNApi.Response;
 using AMNApi.Common.Functions;
+using AMNApi.Dtos.QueryFilters;
 
 namespace AMNApi.Controllers;
 
@@ -31,6 +31,31 @@ public class ConsultoryController : ControllerBase
     {
         this._mapper = mapper;
         this._dbContext = dbContext;
+    }
+
+    [HttpGet]
+    [Route("")]
+    [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
+    [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
+    public async Task<IActionResult> GetAll([FromQuery] ConsultoryQueryFilter filter)
+    {
+        try
+        {
+            var entities = await GetPageds(filter);
+            var dtos = _mapper.Map<IEnumerable<ConsultoryResponseDto>>(entities);
+            var metaDataResponse = new MetaDataResponse(
+                entities.TotalCount,
+                entities.CurrentPage,
+                entities.PageSize
+            );
+            var response = new ApiResponse<IEnumerable<ConsultoryResponseDto>>(data: dtos, meta: metaDataResponse);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            throw new LogicBusinessException(ex);
+        }
     }
 
     [HttpPost]
@@ -60,5 +85,22 @@ public class ConsultoryController : ControllerBase
 
             throw new LogicBusinessException(ex);
         }
+    }
+
+    private async Task<PagedList<Consultory>> GetPageds(ConsultoryQueryFilter filter)
+    {
+        var result = await GetPaged(filter);
+        var pagedItems = PagedList<Consultory>.Create(result, filter.PageNumber, filter.PageSize);
+        return pagedItems;
+    }
+
+    private async Task<IEnumerable<Consultory>> GetPaged(ConsultoryQueryFilter entity)
+    {
+        var query = _dbContext.Consultory.AsQueryable();
+
+        if (entity.Id > 0)
+            query = query.Where(x => x.Id == entity.Id);
+
+        return await query.ToListAsync();
     }
 }

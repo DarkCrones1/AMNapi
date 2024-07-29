@@ -15,4 +15,6 @@ public partial class Consultory : BaseRemovableAuditablePaginationEntity
     public virtual ICollection<Appointment> Appointment { get; } = new List<Appointment>();
 
     public virtual ICollection<Doctor> Doctor { get; } = new List<Doctor>();
+
+    public virtual ICollection<MapLocation> MapLocation { get; } = new List<MapLocation>();
 }
