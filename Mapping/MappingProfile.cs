@@ -44,6 +44,8 @@ public class MappingProfile : Profile
             }
         );
 
+        CreateMap<MapLocation, MapLocationResponseDto>();
+
         CreateMap<UserAccount, UserAccountResponseDto>()
         .ForMember(
             dest => dest.UserName,
@@ -102,7 +104,7 @@ public class MappingProfile : Profile
         CreateMap<AppointmentCreateRequestDto, Appointment>()
         .ForMember(
             dest => dest.Status,
-            opt => opt.MapFrom(src => AppoinmentStatus.Scheduled)
+            opt => opt.MapFrom(src => (short)AppoinmentStatus.Scheduled)
         );
 
         CreateMap<ConsultoryCreateRequestDto, Consultory>()
@@ -127,6 +129,8 @@ public class MappingProfile : Profile
                 dest.Address.Add(address);
             }
         );
+
+        CreateMap<MapLocationCreateRequestDto, MapLocation>();
 
         CreateMap<UserAccountPatientCreateRequestDto, Patient>()
         .AfterMap(
@@ -218,6 +222,7 @@ public class MappingProfile : Profile
         );
 
         // UpdateMapping
+
 
         // QueryFilterMapping
 

@@ -66,9 +66,9 @@ public class MapLocationController : ControllerBase
     {
         try
         {
-            Expression<Func<MapLocation, bool>> Consultory = x => x.ConsultoryId == requestDto.ConsultoryId;
+            Expression<Func<Consultory, bool>> Consultory = x => x.Id == requestDto.ConsultoryId;
 
-            var existConsultory = await _dbContext.MapLocation.AnyAsync(Consultory);
+            var existConsultory = await _dbContext.Consultory.AnyAsync(Consultory);
 
             if (!existConsultory)
                 return BadRequest("no existe el consultorio");

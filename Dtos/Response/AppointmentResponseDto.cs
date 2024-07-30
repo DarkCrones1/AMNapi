@@ -2,6 +2,8 @@ namespace AMNApi.Dtos.Response;
 
 public class AppointmentResponseDto
 {
+    public int Id { get; set; }
+
     public int DoctorId { get; set; }
 
     public int PatientId { get; set; }

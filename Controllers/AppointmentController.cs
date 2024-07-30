@@ -16,21 +16,25 @@ using AMNApi.Entities.Base;
 using Microsoft.AspNetCore.Authorization;
 using AMNApi.Response;
 using AMNApi.Common.Functions;
+using AW.Common.Helpers;
 
 namespace AMNApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
 public class AppointmentController : ControllerBase
 {
     private readonly IMapper _mapper;
     private readonly AMNDbContext _dbContext;
+    private readonly TokenHelper _tokenHelper;
 
-    public AppointmentController(IMapper mapper, AMNDbContext dbContext)
+    public AppointmentController(IMapper mapper, AMNDbContext dbContext, TokenHelper tokenHelper)
     {
         this._mapper = mapper;
         this._dbContext = dbContext;
+        this._tokenHelper = tokenHelper;
     }
 
     [HttpGet]
@@ -79,12 +83,12 @@ public class AppointmentController : ControllerBase
             if (!existPatient)
                 return BadRequest("no existe ningun paciente");
 
-            Expression<Func<Doctor, bool>> filterDoctor = x => x.Id == requestDto.PatientId;
+            Expression<Func<Doctor, bool>> filterDoctor = x => x.Id == requestDto.DoctorId;
 
             var existDoctor = await _dbContext.Doctor.AnyAsync(filterDoctor);
 
             if (!existDoctor)
-                return BadRequest("no existe ningun paciente");
+                return BadRequest("no existe ningun Doctor");
 
             var entity = _mapper.Map<Appointment>(requestDto);
             await _dbContext.Appointment.AddAsync(entity);
@@ -99,6 +103,29 @@ public class AppointmentController : ControllerBase
 
             throw new LogicBusinessException(ex);
         }
+    }
+
+    [HttpPut]
+    [Route("{id:int}/status/{statusId:int}")]
+    [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<AppointmentResponseDto>))]
+    public async Task<IActionResult> ChangeStatus([FromRoute] int id, [FromRoute] int statusId)
+    {
+        Expression<Func<Appointment, bool>> filterAppointment = x => x.Id == id;
+
+        var existAppointment = await _dbContext.Appointment.AnyAsync(filterAppointment);
+
+        if (!existAppointment)
+            return BadRequest("No se ha encontrado ninguna coincidencia");
+
+        var entity = await _dbContext.Appointment.FirstOrDefaultAsync(x => x.Id == id);
+        entity!.Status = (short)statusId;
+        entity.Id = id;
+        entity.LastModifiedBy = _tokenHelper.GetUserName();
+        entity.LastModifiedDate = DateTime.Now;
+        entity.IsDeleted = false;
+        _dbContext.Appointment.Update(entity);
+        await _dbContext.SaveChangesAsync();
+        return Ok(true);
     }
 
     private async Task<PagedList<Appointment>> GetPageds(AppointmentQueryFilter filter)

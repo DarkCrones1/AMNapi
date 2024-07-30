@@ -11,6 +11,8 @@ using FluentValidation.AspNetCore;
 using AMNApi.Filters;
 using AMNApi.Data;
 using AMNApi.Mapping;
+using AW.Common.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace AMNApi;
 
@@ -90,6 +92,10 @@ public class StartUp
             builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
         }));
 
+        // services
+        services.AddScoped<TokenHelper>();
+        services.AddHttpContextAccessor();
+
         // Add AutoValidator
         services.AddValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
         services.AddFluentValidationAutoValidation();
@@ -97,6 +103,25 @@ public class StartUp
 
         // Add Cashing
         services.AddResponseCaching();
+
+        // Add JWT
+        services.AddAuthentication(opttions =>
+        {
+            opttions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            opttions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = Configuration["Authentication:Issuer"],
+                ValidAudience = Configuration["Authentication:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Authentication:SecretKey"]!))
+            };
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment environment)
