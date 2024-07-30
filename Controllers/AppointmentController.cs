@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Authorization;
 using AMNApi.Response;
 using AMNApi.Common.Functions;
 using AW.Common.Helpers;
+using AMNApi.Entities.Enumerations;
+using AMNApi.Dtos.Request.Update;
 
 namespace AMNApi.Controllers;
 
@@ -106,9 +108,9 @@ public class AppointmentController : ControllerBase
     }
 
     [HttpPut]
-    [Route("{id:int}/status/{statusId:int}")]
+    [Route("{id:int}/status/Concluded")]
     [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<AppointmentResponseDto>))]
-    public async Task<IActionResult> ChangeStatus([FromRoute] int id, [FromRoute] int statusId)
+    public async Task<IActionResult> ChangeStatusConcluded([FromRoute] int id)
     {
         Expression<Func<Appointment, bool>> filterAppointment = x => x.Id == id;
 
@@ -118,11 +120,58 @@ public class AppointmentController : ControllerBase
             return BadRequest("No se ha encontrado ninguna coincidencia");
 
         var entity = await _dbContext.Appointment.FirstOrDefaultAsync(x => x.Id == id);
-        entity!.Status = (short)statusId;
+        entity!.Status = (short)AppoinmentStatus.Concluded;
         entity.Id = id;
         entity.LastModifiedBy = _tokenHelper.GetUserName();
         entity.LastModifiedDate = DateTime.Now;
         entity.IsDeleted = false;
+        _dbContext.Appointment.Update(entity);
+        await _dbContext.SaveChangesAsync();
+        return Ok(true);
+    }
+
+    [HttpPut]
+    [Route("{id:int}/status/Loss")]
+    [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<AppointmentResponseDto>))]
+    public async Task<IActionResult> ChangeStatusLoss([FromRoute] int id)
+    {
+        Expression<Func<Appointment, bool>> filterAppointment = x => x.Id == id;
+
+        var existAppointment = await _dbContext.Appointment.AnyAsync(filterAppointment);
+
+        if (!existAppointment)
+            return BadRequest("No se ha encontrado ninguna coincidencia");
+
+        var entity = await _dbContext.Appointment.FirstOrDefaultAsync(x => x.Id == id);
+        entity!.Status = (short)AppoinmentStatus.Loss;
+        entity.Id = id;
+        entity.LastModifiedBy = _tokenHelper.GetUserName();
+        entity.LastModifiedDate = DateTime.Now;
+        entity.IsDeleted = false;
+        _dbContext.Appointment.Update(entity);
+        await _dbContext.SaveChangesAsync();
+        return Ok(true);
+    }
+
+    [HttpPut]
+    [Route("{id:int}/status/ReScheduled")]
+    [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<AppointmentResponseDto>))]
+    public async Task<IActionResult> ChangeStatusReScheduled([FromRoute] int id,[FromBody] AppointmentUpdateRequestDto requestDto)
+    {
+        Expression<Func<Appointment, bool>> filterAppointment = x => x.Id == id;
+
+        var existAppointment = await _dbContext.Appointment.AnyAsync(filterAppointment);
+
+        if (!existAppointment)
+            return BadRequest("No se ha encontrado ninguna coincidencia");
+
+        var entity = await _dbContext.Appointment.FirstOrDefaultAsync(x => x.Id == id);
+        entity!.Status = (short)AppoinmentStatus.ReScheduled;
+        entity.Id = id;
+        entity.LastModifiedBy = _tokenHelper.GetUserName();
+        entity.LastModifiedDate = DateTime.Now;
+        entity.IsDeleted = false;
+        entity.AppoinmentDate = requestDto.AppointmentDate;
         _dbContext.Appointment.Update(entity);
         await _dbContext.SaveChangesAsync();
         return Ok(true);

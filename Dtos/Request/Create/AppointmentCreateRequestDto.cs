@@ -8,5 +8,5 @@ public class AppointmentCreateRequestDto
 
     public int ConsultoryId { get; set; }
 
-    public DateTime AppoinmentDate { get; set; }
+    public DateTime AppointmentDate { get; set; }
 }
