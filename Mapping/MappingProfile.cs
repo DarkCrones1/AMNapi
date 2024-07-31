@@ -1,10 +1,12 @@
 using AMNApi.Dtos.QueryFilters;
 using AMNApi.Dtos.Request.Create;
+using AMNApi.Dtos.Request.Update;
 using AMNApi.Dtos.Response;
 using AMNApi.Entities;
 using AMNApi.Entities.Enumerations;
 using AMNApi.Helpers;
 using AutoMapper;
+using AW.Common.Helpers;
 
 namespace AMNApi.Mapping;
 
@@ -22,6 +24,12 @@ public class MappingProfile : Profile
         ).ForMember(
             dest => dest.StatusName,
             opt => opt.MapFrom(src => EnumHelper.GetDescription<AppoinmentStatus>((AppoinmentStatus)src.Status))
+        ).ForMember(
+            dest => dest.IsActive,
+            opt => opt.MapFrom(src => StatusDeletedHelper.GetStatusDeletedEntity(src.IsDeleted))
+        ).ForMember(
+            dest => dest.AppoinmentDate,
+            opt => opt.MapFrom(src => src.AppoinmentDate)
         );
 
         CreateMap<Consultory, ConsultoryResponseDto>()
@@ -45,6 +53,12 @@ public class MappingProfile : Profile
         );
 
         CreateMap<MapLocation, MapLocationResponseDto>();
+
+        CreateMap<Patient, PatientResponseDto>()
+        .ForMember(
+            dest => dest.GenderName,
+            opt => opt.MapFrom(src => EnumHelper.GetDescription<Gender>((Gender)src.Gender!))
+        );
 
         CreateMap<UserAccount, UserAccountResponseDto>()
         .ForMember(
@@ -105,6 +119,12 @@ public class MappingProfile : Profile
         .ForMember(
             dest => dest.Status,
             opt => opt.MapFrom(src => (short)AppoinmentStatus.Scheduled)
+        ).ForMember(
+            dest => dest.AppoinmentDate,
+            opt => opt.MapFrom(src => src.AppointmentDate)
+        ).ForMember(
+            dest => dest.IsDeleted,
+            opt => opt.MapFrom(src => ValuesStatusPropertyEntity.IsNotDeleted)
         );
 
         CreateMap<ConsultoryCreateRequestDto, Consultory>()
@@ -223,6 +243,23 @@ public class MappingProfile : Profile
 
         // UpdateMapping
 
+        CreateMap<PatientUpdateRequestDto, PatientAddress>()
+        .AfterMap(
+            (src, dest) => 
+            {
+                dest.Address = new Address
+                {
+                    Address1 = src.Address1,
+                    Address2 = src.Address2,
+                    Street = src.Street,
+                    ExternalNumber = src.ExternalNumber,
+                    InternalNumber = src.InternalNumber,
+                    ZipCode = src.ZipCode
+                };
+            }
+        );
+
+        CreateMap<PatientUpdateRequestDto, Patient>();
 
         // QueryFilterMapping
 

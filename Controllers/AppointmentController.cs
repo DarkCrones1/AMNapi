@@ -124,7 +124,7 @@ public class AppointmentController : ControllerBase
         entity.Id = id;
         entity.LastModifiedBy = _tokenHelper.GetUserName();
         entity.LastModifiedDate = DateTime.Now;
-        entity.IsDeleted = false;
+        entity.IsDeleted = true;
         _dbContext.Appointment.Update(entity);
         await _dbContext.SaveChangesAsync();
         return Ok(true);
@@ -147,7 +147,7 @@ public class AppointmentController : ControllerBase
         entity.Id = id;
         entity.LastModifiedBy = _tokenHelper.GetUserName();
         entity.LastModifiedDate = DateTime.Now;
-        entity.IsDeleted = false;
+        entity.IsDeleted = true;
         _dbContext.Appointment.Update(entity);
         await _dbContext.SaveChangesAsync();
         return Ok(true);
@@ -190,6 +190,21 @@ public class AppointmentController : ControllerBase
 
         if (entity.Id > 0)
             query = query.Where(x => x.Id == entity.Id);
+
+        if (entity.Status.HasValue)
+            query = query.Where(x => x.Status == entity.Status.Value);
+
+        if (entity.IsDeleted.HasValue)
+            query = query.Where(x => x.IsDeleted == entity.IsDeleted.Value);
+
+        if (entity.AppointmenDate.HasValue)
+            query = query.Where(x => x.AppoinmentDate == entity.AppointmenDate.Value);
+
+        if (entity.MinAppointmentDate.HasValue)
+            query = query.Where(x => x.AppoinmentDate >= entity.MinAppointmentDate.Value);
+
+        if (entity.MaxAppointmentDate.HasValue)
+            query = query.Where(x => x.AppoinmentDate <= entity.MaxAppointmentDate.Value);
 
         return await query.ToListAsync();
     }
