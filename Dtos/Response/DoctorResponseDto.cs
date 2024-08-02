@@ -18,6 +18,8 @@ public class DoctorResponseDto
 
     public short? Gender { get; set; }
 
+    public string GenderName { get; set; } = null!;
+
     public DateTime? BirthDate { get; set; }
 
     public string FullName { get; set; } = null!;

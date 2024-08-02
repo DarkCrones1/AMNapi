@@ -57,6 +57,18 @@ public class MappingProfile : Profile
             }
         );
 
+        CreateMap<Doctor, DoctorResponseDto>()
+        .AfterMap(
+            (src, dest) =>
+            {
+                dest.GenderName = EnumHelper.GetDescription<Gender>((Gender)src.Gender!);
+
+                var consultory = src.Consultory ?? new Consultory();
+                dest.ConsultoryId = consultory.Id;
+                dest.ConsultoryName = consultory.Name;
+            }
+        );
+
         CreateMap<MapLocation, MapLocationResponseDto>();
 
         CreateMap<Patient, PatientResponseDto>()
@@ -153,7 +165,8 @@ public class MappingProfile : Profile
                 };
                 dest.Address.Add(address);
 
-                var mapLocation = new MapLocation {
+                var mapLocation = new MapLocation
+                {
                     Latitude = src.Latitude,
                     Longitude = src.Longitude
                 };
@@ -162,6 +175,40 @@ public class MappingProfile : Profile
         );
 
         CreateMap<MapLocationCreateRequestDto, MapLocation>();
+
+        CreateMap<PatientCreateRequestDto, Patient>()
+        .AfterMap(
+            (src, dest) =>
+            {
+                dest.Code = Guid.NewGuid();
+                dest.IsDeleted = ValuesStatusPropertyEntity.IsNotDeleted;
+                dest.CreatedDate = DateTime.Now;
+
+                dest.FirstName = src.FirstName;
+                dest.LastName = src.LastName;
+                dest.MiddleName = src.MiddleName;
+                dest.CellPhone = src.CellPhone;
+                dest.Gender = src.Gender;
+                dest.BirthDate = src.BirthDate;
+
+                var patientAddress = new PatientAddress
+                {
+                    RegisterDate = DateTime.Now,
+                    IsDefault = true,
+                    Address = new Address
+                    {
+                        Address1 = src.Address1,
+                        Address2 = src.Address2,
+                        Street = src.Street,
+                        ExternalNumber = src.ExternalNumber,
+                        InternalNumber = src.InternalNumber,
+                        ZipCode = src.ZipCode,
+                    }
+                };
+                dest.PatientAddress.Add(patientAddress);
+
+            }
+        );
 
         CreateMap<UserAccountPatientCreateRequestDto, Patient>()
         .AfterMap(
@@ -176,7 +223,7 @@ public class MappingProfile : Profile
                 dest.Gender = (short)Gender.DontSay;
                 dest.BirthDate = DateTime.Now;
 
-                var customerAddress = new PatientAddress
+                var patientAddress = new PatientAddress
                 {
                     RegisterDate = DateTime.Now,
                     IsDefault = true,
@@ -190,7 +237,7 @@ public class MappingProfile : Profile
                         ZipCode = "Asignar",
                     }
                 };
-                dest.PatientAddress.Add(customerAddress);
+                dest.PatientAddress.Add(patientAddress);
             }
         );
 
@@ -213,6 +260,21 @@ public class MappingProfile : Profile
         ).ForMember(
             dest => dest.Email,
             opt => opt.MapFrom(src => src.Email)
+        );
+
+        CreateMap<DoctorCreateRequestDto, Doctor>()
+        .ForMember(
+            dest => dest.IsDeleted,
+            opt => opt.MapFrom(src => ValuesStatusPropertyEntity.IsNotDeleted)
+        ).ForMember(
+            dest => dest.Code,
+            opt => opt.MapFrom(src => Guid.NewGuid())
+        ).ForMember(
+            dest => dest.Gender,
+            opt => opt.MapFrom(src => (short)src.Gender!)
+        ).ForMember(
+            dest => dest.CreatedDate,
+            opt => opt.MapFrom(src => DateTime.Now)
         );
 
         CreateMap<UserAccountDoctorCreateRequestDto, Doctor>()
@@ -256,7 +318,7 @@ public class MappingProfile : Profile
 
         CreateMap<PatientUpdateRequestDto, PatientAddress>()
         .AfterMap(
-            (src, dest) => 
+            (src, dest) =>
             {
                 dest.Address = new Address
                 {

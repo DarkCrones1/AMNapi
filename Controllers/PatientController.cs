@@ -25,6 +25,7 @@ namespace AMNApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
 public class PatientController : ControllerBase
 {
     private readonly IMapper _mapper;
@@ -60,6 +61,36 @@ public class PatientController : ControllerBase
         }
         catch (Exception ex)
         {
+            throw new LogicBusinessException(ex);
+        }
+    }
+
+    [HttpPost]
+    [Route("")]
+    [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<PatientResponseDto>))]
+    public async Task<IActionResult> Create([FromBody] PatientCreateRequestDto requestDto)
+    {
+        try
+        {
+            Expression<Func<Patient, bool>> filter = x => !x.IsDeleted!.Value && x.CellPhone == requestDto.CellPhone;
+
+            var existPatient = await _dbContext.Patient.AnyAsync(filter);
+
+            if (existPatient)
+                return BadRequest("Ese numero de celular ya ha sido usado");
+
+            var entity = _mapper.Map<Patient>(requestDto);
+            entity.CreatedBy = _tokenHelper.GetUserName();
+            await _dbContext.Patient.AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
+
+            var result = _mapper.Map<PatientResponseDto>(entity);
+            var response = new ApiResponse<PatientResponseDto>(result);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+
             throw new LogicBusinessException(ex);
         }
     }

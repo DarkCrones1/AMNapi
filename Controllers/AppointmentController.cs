@@ -192,6 +192,15 @@ public class AppointmentController : ControllerBase
         if (entity.Id > 0)
             query = query.Where(x => x.Id == entity.Id);
 
+        if (entity.ConsultoryId > 0)
+            query = query.Where(x => x.ConsultoryId == entity.ConsultoryId);
+        
+        if (entity.PatientId > 0)
+            query = query.Where(x => x.PatientId == entity.PatientId);
+
+        if (entity.DoctorId > 0)
+            query = query.Where(x => x.DoctorId == entity.DoctorId);
+
         if (entity.Status.HasValue)
             query = query.Where(x => x.Status == entity.Status.Value);
 
