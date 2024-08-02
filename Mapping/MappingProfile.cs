@@ -57,6 +57,37 @@ public class MappingProfile : Profile
             }
         );
 
+        CreateMap<Consultory, ConsultoryDetailResponseDto>()
+        .ForMember(
+            dest => dest.Code,
+            opt => opt.MapFrom(src => Guid.NewGuid())
+        ).ForMember(
+            dest => dest.Appointment,
+            opt => opt.MapFrom(src => src.Appointment)
+        ).ForMember(
+            dest => dest.Doctor,
+            opt => opt.MapFrom(src => src.Doctor)
+        )
+        .AfterMap(
+            (src, dest) =>
+            {
+                var address = src.Address.FirstOrDefault() ?? new Address();
+
+                dest.Address1 = address.Address1;
+                dest.Address2 = address.Address2;
+                dest.Street = address.Street;
+                dest.ExternalNumber = address.ExternalNumber;
+                dest.InternalNumber = address.InternalNumber;
+                dest.ZipCode = address.ZipCode;
+                dest.FullAddress = address.FullAddress;
+
+                var mapLocation = src.MapLocation.FirstOrDefault() ?? new MapLocation();
+
+                dest.Latitude = mapLocation.Latitude;
+                dest.Longitude = mapLocation.Longitude;
+            }
+        );
+
         CreateMap<Doctor, DoctorResponseDto>()
         .AfterMap(
             (src, dest) =>

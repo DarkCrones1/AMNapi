@@ -59,6 +59,34 @@ public class ConsultoryController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("{id:int}")]
+    [AllowAnonymous]
+    [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
+    [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
+    public async Task<IActionResult> GetById([FromRoute] int id)
+    {
+        try
+        {
+            Expression<Func<Consultory, bool>> filter = x => x.Id == id;
+            var existEntity = await _dbContext.Consultory.AnyAsync(filter);
+    
+            if (!existEntity)
+                return NotFound("No se encontró un elemento que cumpla con la información proporcionada, verifique su información porfavor....");
+    
+            var entity = await _dbContext.Consultory.FirstOrDefaultAsync(x => x.Id == id);
+    
+            var dto = _mapper.Map<ConsultoryDetailResponseDto>(entity);
+            var response = new ApiResponse<ConsultoryDetailResponseDto>(data: dto);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            throw new LogicBusinessException(ex);
+        }
+    }
+
     [HttpPost]
     [Route("")]
     [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<ConsultoryResponseDto>))]
