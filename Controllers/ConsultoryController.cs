@@ -35,6 +35,7 @@ public class ConsultoryController : ControllerBase
 
     [HttpGet]
     [Route("")]
+    [AllowAnonymous]
     [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
     [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]
     [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiResponse<IEnumerable<ConsultoryResponseDto>>))]

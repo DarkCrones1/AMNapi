@@ -18,6 +18,7 @@ using AMNApi.Response;
 using AMNApi.Common.Functions;
 using AMNApi.Dtos.Request.Update;
 using AW.Common.Helpers;
+using AMNApi.Dtos.QueryFilters;
 
 namespace AMNApi.Controllers;
 
@@ -37,7 +38,33 @@ public class PatientController : ControllerBase
         this._tokenHelper = tokenHelper;
     }
 
-    [HttpPost]
+    [HttpGet]
+    [Route("")]
+    [AllowAnonymous]
+    [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<IEnumerable<PatientResponseDto>>))]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiResponse<IEnumerable<PatientResponseDto>>))]
+    [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiResponse<IEnumerable<PatientResponseDto>>))]
+    public async Task<IActionResult> GetAll([FromQuery] PatientQueryFilter filter)
+    {
+        try
+        {
+            var entities = await GetPageds(filter);
+            var dtos = _mapper.Map<IEnumerable<PatientResponseDto>>(entities);
+            var metaDataResponse = new MetaDataResponse(
+                entities.TotalCount,
+                entities.CurrentPage,
+                entities.PageSize
+            );
+            var response = new ApiResponse<IEnumerable<PatientResponseDto>>(data: dtos, meta: metaDataResponse);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            throw new LogicBusinessException(ex);
+        }
+    }
+
+    [HttpPut]
     [Route("{Id:int}")]
     [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<ConsultoryResponseDto>))]
     public async Task<IActionResult> Update([FromRoute] int Id, [FromBody] PatientUpdateRequestDto requestDto)
@@ -73,5 +100,23 @@ public class PatientController : ControllerBase
 
             throw new LogicBusinessException(ex);
         }
+    }
+
+
+    private async Task<PagedList<Patient>> GetPageds(PatientQueryFilter filter)
+    {
+        var result = await GetPaged(filter);
+        var pagedItems = PagedList<Patient>.Create(result, filter.PageNumber, filter.PageSize);
+        return pagedItems;
+    }
+
+    private async Task<IEnumerable<Patient>> GetPaged(PatientQueryFilter entity)
+    {
+        var query = _dbContext.Patient.AsQueryable();
+
+        if (entity.Id > 0)
+            query = query.Where(x => x.Id == entity.Id);
+
+        return await query.ToListAsync();
     }
 }

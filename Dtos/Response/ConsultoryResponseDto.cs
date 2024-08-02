@@ -23,4 +23,8 @@ public class ConsultoryResponseDto
     public string ZipCode { get; set; } = null!;
 
     public string FullAddress { get; set; } = null!;
+
+    public double Latitude { get; set; }
+
+    public double Longitude { get; set; }
 }

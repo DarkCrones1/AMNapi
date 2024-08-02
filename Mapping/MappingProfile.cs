@@ -49,6 +49,11 @@ public class MappingProfile : Profile
                 dest.InternalNumber = address.InternalNumber;
                 dest.ZipCode = address.ZipCode;
                 dest.FullAddress = address.FullAddress;
+
+                var mapLocation = src.MapLocation.FirstOrDefault() ?? new MapLocation();
+
+                dest.Latitude = mapLocation.Latitude;
+                dest.Longitude = mapLocation.Longitude;
             }
         );
 
@@ -147,6 +152,12 @@ public class MappingProfile : Profile
                     ZipCode = src.ZipCode,
                 };
                 dest.Address.Add(address);
+
+                var mapLocation = new MapLocation {
+                    Latitude = src.Latitude,
+                    Longitude = src.Longitude
+                };
+                dest.MapLocation.Add(mapLocation);
             }
         );
 

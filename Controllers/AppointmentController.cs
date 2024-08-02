@@ -41,6 +41,7 @@ public class AppointmentController : ControllerBase
 
     [HttpGet]
     [Route("")]
+    [AllowAnonymous]
     [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ApiResponse<IEnumerable<AppointmentResponseDto>>))]
     [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(ApiResponse<IEnumerable<AppointmentResponseDto>>))]
     [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ApiResponse<IEnumerable<AppointmentResponseDto>>))]

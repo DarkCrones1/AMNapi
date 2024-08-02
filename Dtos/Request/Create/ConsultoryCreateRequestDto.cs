@@ -19,4 +19,10 @@ public class ConsultoryCreateRequestDto
     public string? InternalNumber { get; set; }
 
     public string ZipCode { get; set; } = null!;
+
+    // MapLocation
+
+    public double Latitude { get; set; }
+
+    public double Longitude { get; set; }
 }
