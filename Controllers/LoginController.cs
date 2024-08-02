@@ -132,7 +132,7 @@ public class LoginController : ControllerBase
                 new Claim(ClaimTypes.DateOfBirth, DateTime.Now.ToString()),
                 //new Claim("", "") //TODO: agregar valores personalizados
                 new Claim("UserAccountType", $"{_userPatient.AccountType}"),
-                new Claim("DoctorId", $"{_userPatient.PatientId}")
+                new Claim("PatientId", $"{_userPatient.PatientId}")
             };
 
         // Payload
