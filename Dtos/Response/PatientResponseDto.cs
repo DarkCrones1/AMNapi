@@ -23,4 +23,18 @@ public class PatientResponseDto
     public string FullName { get => $"{FirstName} {MiddleName} {LastName}".Trim(); }
 
     public bool IsDeleted { get; set; }
+
+    public string Address1 { get; set; } = null!;
+
+    public string? Address2 { get; set; }
+
+    public string Street { get; set; } = null!;
+
+    public string ExternalNumber { get; set; } = null!;
+
+    public string? InternalNumber { get; set; }
+
+    public string ZipCode { get; set; } = null!;
+
+    public string FullAddress { get; set; } = null!;
 }

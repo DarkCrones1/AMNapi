@@ -173,8 +173,10 @@ public class AppointmentController : ControllerBase
         entity.LastModifiedDate = DateTime.Now;
         entity.IsDeleted = false;
         entity.AppoinmentDate = requestDto.AppointmentDate;
+
         _dbContext.Appointment.Update(entity);
         await _dbContext.SaveChangesAsync();
+        
         return Ok(true);
     }
 

@@ -106,6 +106,20 @@ public class MappingProfile : Profile
         .ForMember(
             dest => dest.GenderName,
             opt => opt.MapFrom(src => EnumHelper.GetDescription<Gender>((Gender)src.Gender!))
+        ).AfterMap(
+            (src, dest) =>
+            {
+                var pAddress = src.PatientAddress.FirstOrDefault() ?? new PatientAddress();
+                var address = pAddress.Address ?? new Address();
+                
+                dest.Address1 = address.Address1;
+                dest.Address2 = address.Address2;
+                dest.Street = address.Street;
+                dest.ExternalNumber = address.ExternalNumber;
+                dest.InternalNumber = address.InternalNumber;
+                dest.ZipCode = address.ZipCode;
+                dest.FullAddress = address.FullAddress;
+            }
         );
 
         CreateMap<UserAccount, UserAccountResponseDto>()
